@@ -1,11 +1,13 @@
-package com.raghav.trademap.model;
+package com.raghav.trademap.modules.tradeDetails;
 
-import com.raghav.trademap.requestResponseModel.TradeDetailsRequest;
+import com.raghav.trademap.common.types.InstrumentType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DialectOverride;
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,6 +34,9 @@ public class TradeDetails {
 
     @Column(name = "is_holiday")
     private boolean isHoliday;
+
+    @Column(name = "is_weekend")
+    private Boolean isWeekend;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "instrument_type")

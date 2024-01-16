@@ -1,4 +1,4 @@
-package com.raghav.trademap.requestResponseModel;
+package com.raghav.trademap.modules.tradeDetails.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

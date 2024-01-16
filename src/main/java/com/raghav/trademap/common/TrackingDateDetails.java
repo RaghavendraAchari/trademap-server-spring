@@ -1,10 +1,8 @@
-package com.raghav.trademap.model;
+package com.raghav.trademap.common;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 
 import java.time.LocalDate;
 
@@ -15,6 +13,7 @@ public class TrackingDateDetails {
     @Id
     Integer id;
 
+    @Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)
     @Column(name = "start_date")
     private LocalDate startDate;
 }

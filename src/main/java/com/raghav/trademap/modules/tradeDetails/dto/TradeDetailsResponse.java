@@ -1,11 +1,11 @@
-package com.raghav.trademap.requestResponseModel;
+package com.raghav.trademap.modules.tradeDetails.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.raghav.trademap.model.InstrumentType;
-import com.raghav.trademap.model.TradeDetails;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.raghav.trademap.common.types.InstrumentType;
+import com.raghav.trademap.modules.tradeDetails.TradeDetails;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,7 +23,11 @@ public class TradeDetailsResponse {
 
     private boolean noTradingDay;
 
+    @JsonProperty("isHoliday")
     private boolean isHoliday;
+
+    @JsonProperty("isWeekend")
+    private Boolean isWeekend;
 
     private InstrumentType instrumentType;
 
@@ -59,6 +63,7 @@ public class TradeDetailsResponse {
                 .pnl(tradeDetails.getPnl())
                 .resultType(tradeDetails.getResultType())
                 .imagePaths(tradeDetails.getImagePaths())
+                .isWeekend(tradeDetails.getIsWeekend())
                 .build();
     }
 }

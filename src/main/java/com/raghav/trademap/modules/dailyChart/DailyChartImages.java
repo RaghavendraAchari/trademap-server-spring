@@ -1,5 +1,6 @@
-package com.raghav.trademap.model;
+package com.raghav.trademap.modules.dailyChart;
 
+import com.raghav.trademap.common.types.IndexType;
 import jakarta.persistence.*;
 import lombok.Data;
 

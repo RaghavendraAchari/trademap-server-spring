@@ -1,4 +1,4 @@
-package com.raghav.trademap.model;
+package com.raghav.trademap.common.types;
 
 public enum IndexType {
     NIFTY,

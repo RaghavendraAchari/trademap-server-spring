@@ -1,13 +1,14 @@
-package com.raghav.trademap.requestResponseModel;
+package com.raghav.trademap.modules.tradeDetails.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.raghav.trademap.model.InstrumentType;
-import com.raghav.trademap.model.TradeDetails;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.raghav.trademap.common.types.InstrumentType;
+import com.raghav.trademap.modules.tradeDetails.TradeDetails;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,7 +18,7 @@ public class TradeDetailsRequest {
         private Integer day;
 
         @NotNull
-        @JsonFormat(pattern = "yyyy-MM-DD'T'HH:mm:ss")
+        @JsonDeserialize(using = LocalDateTimeDeserializer.class)
         private LocalDateTime dateTime;
 
         @NotNull
@@ -26,7 +27,7 @@ public class TradeDetailsRequest {
         @NotNull
         private boolean isHoliday;
 
-        @NotBlank
+        @Valid
         private InstrumentType instrumentType;
 
         @NotBlank
@@ -35,10 +36,9 @@ public class TradeDetailsRequest {
         @NotBlank
         private String setupName;
 
-        @NotBlank
-        private float riskToReward;
+        private Float riskToReward;
 
-        private float riskToRewardOnPremium;
+        private Float riskToRewardOnPremium;
 
         @NotBlank
         private String remarks;
@@ -46,8 +46,8 @@ public class TradeDetailsRequest {
         @NotBlank
         private String resultType;
 
-        @NotBlank
-        private double pnl;
+        @NotNull
+        private Double pnl;
 
         public static TradeDetails mapToTradeDetails(TradeDetailsRequest request, List<String> paths) {
                 return TradeDetails.builder()

@@ -1,4 +1,4 @@
-package com.raghav.trademap.config;
+package com.raghav.trademap.common.config;
 
 
 import org.springframework.context.annotation.Configuration;
@@ -14,4 +14,5 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**");
     }
+
 }
