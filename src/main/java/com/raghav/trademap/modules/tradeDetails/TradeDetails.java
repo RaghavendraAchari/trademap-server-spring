@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DialectOverride;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 
@@ -36,6 +37,7 @@ public class TradeDetails {
     private boolean isHoliday;
 
     @Column(name = "is_weekend")
+    @ColumnDefault("false")
     private Boolean isWeekend;
 
     @Enumerated(EnumType.STRING)

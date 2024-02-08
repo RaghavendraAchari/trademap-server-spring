@@ -38,7 +38,8 @@ public class TradeDetailsService {
     public List<TradeDetailsResponse> getTradeDetails(Integer page, Integer size){
         Pageable pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateTime"));
 
-        Page<TradeDetails> tradeDetails = tradeDetailsRepo.findAll(pageRequest);
+//        Page<TradeDetails> tradeDetails = tradeDetailsRepo.findAll(pageRequest);
+        List<TradeDetails> tradeDetails = tradeDetailsRepo.findAll(Sort.by(Sort.Direction.DESC, "dateTime"));
 
         return tradeDetails.stream().map(TradeDetailsResponse::mapToTradeDetailsResponse).toList();
     }
@@ -81,6 +82,15 @@ public class TradeDetailsService {
 
     @Transactional
     public TradeDetailsResponse postTradeDetails(TradeDetailsRequest request, MultipartFile[] images){
+        List<TradeDetails> result = tradeDetailsRepo.getTradesForTheDate(request.getDateTime().toLocalDate());
+
+        if(result.size() == 1 ){
+            TradeDetails trade = result.get(0);
+
+            if(trade.isNoTradingDay() || trade.isHoliday() || Boolean.TRUE.equals(trade.getIsWeekend()))
+                throw new RuntimeException("The day is set as no trading day.");
+        }
+
         String date = request.getDateTime().toLocalDate().toString();
         String setupName = request.getSetupName().trim().replace(" ", "-");
 

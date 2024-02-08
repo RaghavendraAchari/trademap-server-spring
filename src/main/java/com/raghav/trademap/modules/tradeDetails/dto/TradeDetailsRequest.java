@@ -1,6 +1,7 @@
 package com.raghav.trademap.modules.tradeDetails.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.raghav.trademap.common.types.InstrumentType;
@@ -9,6 +10,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,10 +24,16 @@ public class TradeDetailsRequest {
         private LocalDateTime dateTime;
 
         @NotNull
+        @JsonProperty("noTradingDay")
         private boolean noTradingDay;
 
         @NotNull
+        @JsonProperty("isHoliday")
         private boolean isHoliday;
+
+        @NotNull
+        @JsonProperty("isWeekend")
+        private boolean isWeekend;
 
         @Valid
         private InstrumentType instrumentType;
@@ -59,6 +67,7 @@ public class TradeDetailsRequest {
                         .instrumentName(request.instrumentName)
                         .instrumentType(request.instrumentType)
                         .isHoliday(request.isHoliday)
+                        .isWeekend(request.isWeekend)
                         .remarks(request.remarks)
                         .setupName(request.setupName)
                         .resultType(request.resultType)
