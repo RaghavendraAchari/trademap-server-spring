@@ -31,10 +31,10 @@ public interface TradeDetailsRepo extends JpaRepository<TradeDetails, Long> {
     @Query("select a from TradeDetails a where Date(a.dateTime) = :date")
     List<TradeDetails> getTradesForTheDate(@Param("date") LocalDate date);
 
-    @Query("select distinct a.instrumentName from TradeDetails a")
+    @Query("select distinct a.instrumentName from TradeDetails a where a.instrumentName is not null")
     List<String> findDistinctInstrumentName();
 
-    @Query("select distinct a.setupName from TradeDetails a")
+    @Query("select distinct a.setupName from TradeDetails a where a.setupName is not null")
     List<String> findDistinctSetupName();
 
 }

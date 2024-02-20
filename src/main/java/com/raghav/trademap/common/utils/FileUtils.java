@@ -1,6 +1,7 @@
 package com.raghav.trademap.common.utils;
 
 import com.raghav.trademap.modules.tradeDetails.dto.TradeDetailsRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -12,7 +13,9 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
+@Slf4j
 public class FileUtils {
     public static List<String> copyFileToSystem(TradeDetailsRequest request, MultipartFile[] images, String setupName, String date) {
         List<String> paths = new ArrayList<>();
@@ -44,5 +47,33 @@ public class FileUtils {
         }
 
         return paths;
+    }
+
+    public static String copyFileFromMultipartFile(MultipartFile file){
+        Path path = Paths.get("User Data", "Insight Image Contents");
+
+        if(!Files.exists(path)){
+            try {
+                Files.createDirectories(path);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        String fileName;
+        if(file.getOriginalFilename() == null)
+            fileName = "Insight Image - " + String.valueOf(new Random().nextLong());
+        else
+            fileName = file.getOriginalFilename().replace("&", "-");
+
+        try(InputStream inputStream = file.getInputStream()){
+            Path filePath = path.resolve(fileName);
+            log.info("Copying uploaded insight content file to : " + filePath.toString());
+            Files.copy( inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            return filePath.toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

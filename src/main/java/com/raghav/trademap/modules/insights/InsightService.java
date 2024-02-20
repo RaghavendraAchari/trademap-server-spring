@@ -4,6 +4,7 @@ import com.raghav.trademap.common.types.ResourceType;
 import com.raghav.trademap.exceptions.ResourceNotFoundException;
 import com.raghav.trademap.modules.insights.dto.InsightRequest;
 import com.raghav.trademap.modules.insights.dto.InsightResponse;
+import com.raghav.trademap.modules.insights.dto.InsightUpdateRequest;
 import com.raghav.trademap.modules.insights.dto.InsightsWithOnlyTitle;
 import com.raghav.trademap.modules.insights.model.Insight;
 import jakarta.transaction.Transactional;
@@ -54,12 +55,11 @@ public class InsightService {
     }
 
     @Transactional
-    public InsightResponse updateInsight(InsightRequest request) {
+    public InsightResponse updateInsight(InsightUpdateRequest request) {
         Optional<Insight> result = insightsRepo.findById(request.getId());
         Insight oldData = result.orElseThrow();
 
         oldData.setContent(request.getContent());
-        oldData.setTitle(request.getTitle());
         oldData.setLastUpdatedDateTime(LocalDateTime.now());
 
         Insight saved = insightsRepo.save(oldData);

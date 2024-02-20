@@ -5,5 +5,6 @@ public enum ResourceType {
     TRADEDETAILS,
     DAILYCHART,
     INVESTMENT,
-    INSIGHT;
+    INSIGHT,
+    SETTINGS;
 }
