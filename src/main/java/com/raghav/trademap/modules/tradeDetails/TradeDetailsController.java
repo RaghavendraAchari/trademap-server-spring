@@ -1,9 +1,6 @@
 package com.raghav.trademap.modules.tradeDetails;
 
-import com.raghav.trademap.modules.tradeDetails.dto.DistinctData;
-import com.raghav.trademap.modules.tradeDetails.dto.NoTradeRequest;
-import com.raghav.trademap.modules.tradeDetails.dto.TradeDetailsRequest;
-import com.raghav.trademap.modules.tradeDetails.dto.TradeDetailsResponse;
+import com.raghav.trademap.modules.tradeDetails.dto.*;
 import jakarta.validation.Valid;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +30,12 @@ public class TradeDetailsController {
 
     @GetMapping()
     public ResponseEntity<List<TradeDetailsResponse>> getTradeDetails(@RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "10") Integer size){
-        return ResponseEntity.ok(tradeDetailsService.getTradeDetails(page, size));
+        List<TradeDetails> tradeDetails = tradeDetailsService.getTradeDetails(page, size);
+
+        List<TradeDetailsResponse> response = tradeDetails.stream()
+                                                .map(TradeDetailsResponse::mapToTradeDetailsResponse).toList();
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/setupsAndInstuments")
@@ -41,6 +43,7 @@ public class TradeDetailsController {
         return ResponseEntity.ok(tradeDetailsService.getDistinctData());
     }
 
+    @Deprecated
     @GetMapping("/lastFilledDate")
     public ResponseEntity<String> getLastFilledDate(){
         return ResponseEntity.ok(tradeDetailsService.getLastFilledDate());
@@ -53,12 +56,21 @@ public class TradeDetailsController {
 
     @GetMapping("/today")
     public ResponseEntity<List<TradeDetailsResponse>> getTradeDetailsOfToday(){
-        return ResponseEntity.ok(tradeDetailsService.getCurrentDayTrades());
+        List<TradeDetails> currentDayTrades = tradeDetailsService.getCurrentDayTrades();
+
+        List<TradeDetailsResponse> response = currentDayTrades.stream()
+                .map(TradeDetailsResponse::mapToTradeDetailsResponse).toList();
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/forDate")
     public ResponseEntity<List<TradeDetailsResponse>> getTradeDetailsForDay(@RequestParam("date") LocalDate date){
-        return ResponseEntity.ok(tradeDetailsService.getTradesForTheDate(date));
+        List<TradeDetails> tradesForTheDate = tradeDetailsService.getTradesForTheDate(date);
+
+        List<TradeDetailsResponse> responseList = tradesForTheDate.stream().map(TradeDetailsResponse::mapToTradeDetailsResponse).toList();
+
+        return ResponseEntity.ok(responseList);
     }
 
     @PostMapping("/setNoTradingDay")
@@ -67,11 +79,10 @@ public class TradeDetailsController {
     }
 
     @GetMapping(value = "/getMaxDaysTraded", produces="application/json")
-    public ResponseEntity<String> getMaxDayTraded(){
-        JSONObject data = new JSONObject();
-        data.put("days", tradeDetailsService.getMaxDayTraded());
+    public ResponseEntity<MaxTradedDays> getMaxDayTraded(){
+        Integer maxDayTraded = tradeDetailsService.getMaxDayTraded();
 
-        return ResponseEntity.ok(data.toString());
+        return ResponseEntity.ok(new MaxTradedDays(maxDayTraded));
     }
 
     @GetMapping(value = "/downloadImage")
@@ -100,11 +111,9 @@ public class TradeDetailsController {
 
     @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE } )
     public ResponseEntity<TradeDetailsResponse> postTradeDetails(@RequestPart("tradeDetails") @Valid TradeDetailsRequest tradeDetailsRequest, @RequestPart("images") MultipartFile[] images){
-        TradeDetailsResponse tradeDetailsResponse = tradeDetailsService.postTradeDetails(tradeDetailsRequest, images);
+        TradeDetails saved = tradeDetailsService.postTradeDetails(tradeDetailsRequest, images);
 
-        return ResponseEntity.ok(tradeDetailsResponse);
+        return ResponseEntity.ok(TradeDetailsResponse.mapToTradeDetailsResponse(saved));
 
     }
-
-
 }

@@ -7,10 +7,8 @@ import com.raghav.trademap.common.utils.FileUtils;
 import com.raghav.trademap.modules.tradeDetails.dto.DistinctData;
 import com.raghav.trademap.modules.tradeDetails.dto.NoTradeRequest;
 import com.raghav.trademap.modules.tradeDetails.dto.TradeDetailsRequest;
-import com.raghav.trademap.modules.tradeDetails.dto.TradeDetailsResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -35,13 +33,11 @@ public class TradeDetailsService {
     @Autowired
     private DailyChartImagesRepo dailyChartImagesRepo;
 
-    public List<TradeDetailsResponse> getTradeDetails(Integer page, Integer size){
+    public List<TradeDetails> getTradeDetails(Integer page, Integer size){
         Pageable pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateTime"));
 
 //        Page<TradeDetails> tradeDetails = tradeDetailsRepo.findAll(pageRequest);
-        List<TradeDetails> tradeDetails = tradeDetailsRepo.findAll(Sort.by(Sort.Direction.DESC, "dateTime"));
-
-        return tradeDetails.stream().map(TradeDetailsResponse::mapToTradeDetailsResponse).toList();
+        return tradeDetailsRepo.findAll(Sort.by(Sort.Direction.DESC, "dateTime"));
     }
 
     public String getLastFilledDate(){
@@ -81,9 +77,10 @@ public class TradeDetailsService {
     }
 
     @Transactional
-    public TradeDetailsResponse postTradeDetails(TradeDetailsRequest request, MultipartFile[] images){
+    public TradeDetails postTradeDetails(TradeDetailsRequest request, MultipartFile[] images){
         List<TradeDetails> result = tradeDetailsRepo.getTradesForTheDate(request.getDateTime().toLocalDate());
 
+        //if already set as 'no trading day' then throw an error
         if(result.size() == 1 ){
             TradeDetails trade = result.get(0);
 
@@ -91,16 +88,16 @@ public class TradeDetailsService {
                 throw new RuntimeException("The day is set as no trading day.");
         }
 
+        //copy the file and get path
         String date = request.getDateTime().toLocalDate().toString();
         String setupName = request.getSetupName().trim().replace(" ", "-");
 
         List<String> paths = FileUtils.copyFileToSystem(request, images, setupName, date);
 
+        //create db entity with image paths
         TradeDetails tradeDetails = TradeDetailsRequest.mapToTradeDetails(request, paths);
 
-        TradeDetails saved = tradeDetailsRepo.save(tradeDetails);
-
-        return TradeDetailsResponse.mapToTradeDetailsResponse(saved);
+        return tradeDetailsRepo.save(tradeDetails);
     }
 
 
@@ -110,10 +107,8 @@ public class TradeDetailsService {
         return maxDay != null ? maxDay : 0;
     }
 
-    public List<TradeDetailsResponse> getCurrentDayTrades() {
-        List<TradeDetails> tradeDetailsOfCurrentDay = tradeDetailsRepo.findTradeDetailsOfCurrentDay();
-
-        return tradeDetailsOfCurrentDay.stream().map(TradeDetailsResponse::mapToTradeDetailsResponse).toList();
+    public List<TradeDetails> getCurrentDayTrades() {
+        return tradeDetailsRepo.findTradeDetailsOfCurrentDay();
     }
 
     @Transactional
@@ -138,10 +133,8 @@ public class TradeDetailsService {
         return saved.getId() != null;
     }
 
-    public List<TradeDetailsResponse> getTradesForTheDate(LocalDate date) {
-        List<TradeDetails> result = tradeDetailsRepo.getTradesForTheDate(date);
-
-        return result.stream().map(TradeDetailsResponse::mapToTradeDetailsResponse).toList();
+    public List<TradeDetails> getTradesForTheDate(LocalDate date) {
+        return tradeDetailsRepo.getTradesForTheDate(date);
     }
 
     public DistinctData getDistinctData() {
