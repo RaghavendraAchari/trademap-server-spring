@@ -6,6 +6,8 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +18,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -29,8 +29,13 @@ public class TradeDetailsController {
     private TradeDetailsService tradeDetailsService;
 
     @GetMapping()
-    public ResponseEntity<List<TradeDetailsResponse>> getTradeDetails(@RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "10") Integer size){
-        List<TradeDetails> tradeDetails = tradeDetailsService.getTradeDetails(page, size);
+    public ResponseEntity<List<TradeDetailsResponse>> getTradeDetails(@RequestParam(required = false) Integer page,
+                                                                      @RequestParam(required = false) Integer size,
+                                                                      @RequestParam(defaultValue = "DESC") Sort.Direction sort,
+                                                                      @RequestParam(defaultValue = "true") Boolean showHoliday,
+                                                                      @RequestParam(defaultValue = "true") Boolean showNoTradingDay,
+                                                                      @RequestParam(defaultValue = "true") Boolean showWeekend ){
+        List<TradeDetails> tradeDetails = tradeDetailsService.getTradeDetails(page, size, sort, showHoliday, showWeekend, showNoTradingDay);
 
         List<TradeDetailsResponse> response = tradeDetails.stream()
                                                 .map(TradeDetailsResponse::mapToTradeDetailsResponse).toList();

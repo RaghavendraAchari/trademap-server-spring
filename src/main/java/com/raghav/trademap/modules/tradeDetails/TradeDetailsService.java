@@ -1,17 +1,20 @@
 package com.raghav.trademap.modules.tradeDetails;
 
-import com.raghav.trademap.common.TrackingDateDetails;
-import com.raghav.trademap.common.TrackingDateDetailsRepo;
 import com.raghav.trademap.modules.dailyChart.DailyChartImagesRepo;
 import com.raghav.trademap.common.utils.FileUtils;
+import com.raghav.trademap.modules.settings.Settings;
+import com.raghav.trademap.modules.settings.SettingsRepo;
 import com.raghav.trademap.modules.tradeDetails.dto.DistinctData;
 import com.raghav.trademap.modules.tradeDetails.dto.NoTradeRequest;
 import com.raghav.trademap.modules.tradeDetails.dto.TradeDetailsRequest;
+import jakarta.persistence.criteria.*;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,21 +26,39 @@ import java.util.Optional;
 
 
 @Service
+@Slf4j
 public class TradeDetailsService {
     @Autowired
     private TradeDetailsRepo tradeDetailsRepo;
 
     @Autowired
-    private TrackingDateDetailsRepo trackingDateDetailsRepo;
+    private SettingsRepo settingsRepo;
 
     @Autowired
     private DailyChartImagesRepo dailyChartImagesRepo;
 
-    public List<TradeDetails> getTradeDetails(Integer page, Integer size){
-        Pageable pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateTime"));
+    public List<TradeDetails> getTradeDetails(Integer page, Integer size, Sort.Direction sortDirection, Boolean showHoliday, Boolean showWeekend, Boolean showNoTradingDay){
+        log.info("Getting all trades from DB with Sort:" + sortDirection);
 
-//        Page<TradeDetails> tradeDetails = tradeDetailsRepo.findAll(pageRequest);
-        return tradeDetailsRepo.findAll(Sort.by(Sort.Direction.DESC, "dateTime"));
+        Specification<TradeDetails> specification = new Specification<>() {
+            @Override
+            public Predicate toPredicate(Root<TradeDetails> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+                List<Predicate> predicates = new ArrayList<>();
+
+                if(!showHoliday) predicates.add(criteriaBuilder.equal(root.get("isHoliday"), false));
+                if(!showWeekend) predicates.add(criteriaBuilder.equal(root.get("isWeekend"), false));
+                if(!showNoTradingDay) predicates.add(criteriaBuilder.equal(root.get("noTradingDay"), false));
+
+                return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+            }
+        };
+
+        if(page == null || size == null){
+            return tradeDetailsRepo.findAll(specification, Sort.by(sortDirection, "dateTime"));
+        }
+
+        Pageable pageData = PageRequest.of(page, size, Sort.by(sortDirection, "dateTime"));
+        return tradeDetailsRepo.findAll(specification, pageData).getContent();
     }
 
     public String getLastFilledDate(){
@@ -50,7 +71,7 @@ public class TradeDetailsService {
     }
 
     public List<String> getPendingDates(){
-        Optional<TrackingDateDetails> result = trackingDateDetailsRepo.findById(1);
+        Optional<Settings> result = settingsRepo.findById(1);
 
         if (result.isEmpty())
             throw new RuntimeException();

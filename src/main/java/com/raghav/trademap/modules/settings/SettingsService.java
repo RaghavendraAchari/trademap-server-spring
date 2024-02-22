@@ -62,9 +62,6 @@ public class SettingsService {
 
     @Transactional
     public Settings updateSettings(SettingsUpdateRequest request) {
-        if(settingsRepo.findById(1).isPresent())
-            throw new RuntimeException("Data already exists");
-
         if(request.getId() == null)
             throw new RuntimeException("ID is required for updating the settings");
 

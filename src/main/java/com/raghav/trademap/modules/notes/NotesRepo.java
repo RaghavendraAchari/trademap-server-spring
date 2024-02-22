@@ -9,9 +9,9 @@ import java.util.List;
 
 @Repository
 public interface NotesRepo extends JpaRepository<Note, Long> {
-    @Query("select distinct(a.tags) from Notes a")
+    @Query("select distinct(a.tags) from Note a")
     List<String> findDistinctTags();
 
-    @Query("select distinct(a.categories) from Notes a")
+    @Query("select distinct(a.categories) from Note a")
     List<String> findDistinctCategories();
 }

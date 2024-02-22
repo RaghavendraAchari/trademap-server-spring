@@ -1,5 +1,9 @@
 package com.raghav.trademap.modules.tradeDetails;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -37,4 +41,7 @@ public interface TradeDetailsRepo extends JpaRepository<TradeDetails, Long> {
     @Query("select distinct a.setupName from TradeDetails a where a.setupName is not null")
     List<String> findDistinctSetupName();
 
+    Page<TradeDetails> findAll(Specification<TradeDetails> specification, Pageable pageable);
+
+    List<TradeDetails> findAll(Specification<TradeDetails> specification, Sort sort);
 }
