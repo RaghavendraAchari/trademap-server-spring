@@ -3,7 +3,6 @@ package com.raghav.trademap.modules.insights;
 import com.raghav.trademap.common.types.ResourceType;
 import com.raghav.trademap.exceptions.ResourceNotFoundException;
 import com.raghav.trademap.modules.insights.dto.InsightRequest;
-import com.raghav.trademap.modules.insights.dto.InsightResponse;
 import com.raghav.trademap.modules.insights.dto.InsightUpdateRequest;
 import com.raghav.trademap.modules.insights.dto.InsightsWithOnlyTitle;
 import com.raghav.trademap.modules.insights.model.Insight;
@@ -23,10 +22,8 @@ public class InsightService {
         this.insightsRepo = repo;
     }
 
-    public List<InsightResponse> getAllInsights() {
-        List<Insight> result = insightsRepo.findAll(Sort.by(Sort.Direction.DESC, "createdDateTime"));
-
-        return result.stream().map(InsightResponse::mapToInsightResponse).toList();
+    public List<Insight> getAllInsights() {
+        return insightsRepo.findAll(Sort.by(Sort.Direction.DESC, "createdDateTime"));
     }
 
     public List<InsightsWithOnlyTitle> getAllInsightsWithTitlesOnly() {
@@ -35,36 +32,33 @@ public class InsightService {
         return result.stream().map(InsightsWithOnlyTitle::mapToInsightsWithTitlesOnly).toList();
     }
 
-    public InsightResponse getInsightById(Long id) {
+    public Insight getInsightById(Long id) {
         Optional<Insight> result = insightsRepo.findById(id);
-        Insight insight = result.orElseThrow(() -> new ResourceNotFoundException("No resource found", ResourceType.INSIGHT));
 
-        return InsightResponse.mapToInsightResponse(insight);
+        return result.orElseThrow(() -> new ResourceNotFoundException("No resource found", ResourceType.INSIGHT));
     }
 
     @Transactional
-    public InsightResponse saveInsight(InsightRequest request){
+    public Insight saveInsight(InsightRequest request){
         Insight insight = Insight.fromRequest(request);
 
         Insight saved = insightsRepo.save(insight);
 
         if (saved.getId() == null)
             throw new RuntimeException("Could not save the data");
-
-        return InsightResponse.mapToInsightResponse(saved);
+        else
+            return saved;
     }
 
     @Transactional
-    public InsightResponse updateInsight(InsightUpdateRequest request) {
+    public Insight updateInsight(InsightUpdateRequest request) {
         Optional<Insight> result = insightsRepo.findById(request.getId());
         Insight oldData = result.orElseThrow();
 
         oldData.setContent(request.getContent());
         oldData.setLastUpdatedDateTime(LocalDateTime.now());
 
-        Insight saved = insightsRepo.save(oldData);
-
-        return InsightResponse.mapToInsightResponse(saved);
+        return insightsRepo.save(oldData);
     }
 
     @Transactional

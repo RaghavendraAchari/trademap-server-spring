@@ -1,7 +1,6 @@
 package com.raghav.trademap.modules.analytics;
 
-import com.raghav.trademap.modules.analytics.dto.AnalyticsResponse;
-import com.raghav.trademap.modules.insights.InsightsRepo;
+import com.raghav.trademap.modules.analytics.dto.Analytics;
 import com.raghav.trademap.modules.investment.InvestmentDetailsRepo;
 import com.raghav.trademap.modules.investment.model.InvestmentDetails;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,7 @@ public class AnalyticsService {
 
 
     //TODO - add insights details - user should be greeted with the learnings the he has done in his trading journey
-    public AnalyticsResponse getDetails(String userId){
+    public Analytics getDetails(String userId){
         //TODO - add all the analytics data by fetching it with all the available repositories
         /*
         *
@@ -49,7 +48,7 @@ public class AnalyticsService {
         *
         * return data
         */
-        return AnalyticsResponse.builder()
+        return Analytics.builder()
                 .totalInvestment(130000.0)
                 .totalDays(100)
                 .totalWeekends(20)

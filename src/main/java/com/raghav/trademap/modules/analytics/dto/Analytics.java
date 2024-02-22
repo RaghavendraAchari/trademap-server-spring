@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AnalyticsResponse {
+public class Analytics {
     private Long useId; //for future reference
 
     private Double totalInvestment;

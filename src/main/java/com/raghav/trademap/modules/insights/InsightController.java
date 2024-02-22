@@ -2,6 +2,7 @@ package com.raghav.trademap.modules.insights;
 
 import com.raghav.trademap.common.utils.FileUtils;
 import com.raghav.trademap.modules.insights.dto.*;
+import com.raghav.trademap.modules.insights.model.Insight;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -32,7 +33,9 @@ public class InsightController {
 
     @GetMapping()
     public ResponseEntity<List<InsightResponse>> getInsights(){
-        return ResponseEntity.ok(insightService.getAllInsights());
+        List<Insight> allInsights = insightService.getAllInsights();
+
+        return ResponseEntity.ok(allInsights.stream().map(InsightResponse::mapToInsightResponse).toList());
     }
 
     @GetMapping("/onlyTitles")
@@ -42,12 +45,16 @@ public class InsightController {
 
     @GetMapping("/:id")
     public ResponseEntity<InsightResponse> getInsightById(@PathVariable(name = "id") Long id){
-        return ResponseEntity.ok(insightService.getInsightById(id));
+        Insight insightById = insightService.getInsightById(id);
+
+        return ResponseEntity.ok(InsightResponse.mapToInsightResponse(insightById));
     }
 
     @PostMapping()
     public ResponseEntity<InsightResponse> saveInsights(@RequestBody InsightRequest request){
-        return ResponseEntity.ok(insightService.saveInsight(request));
+        Insight insight = insightService.saveInsight(request);
+
+        return ResponseEntity.ok(InsightResponse.mapToInsightResponse(insight));
     }
 
     @PutMapping()
@@ -55,7 +62,9 @@ public class InsightController {
         if(request.getId() == null)
             throw new RuntimeException("ID must not be null");
 
-        return ResponseEntity.ok(insightService.updateInsight(request));
+        Insight insight = insightService.updateInsight(request);
+
+        return ResponseEntity.ok(InsightResponse.mapToInsightResponse(insight));
     }
 
     @DeleteMapping()
@@ -73,8 +82,10 @@ public class InsightController {
                 .success(!urlPath.isEmpty() ? 1 : 0)
                 .file(new ContentImageUploadResponse.FileResponse(absolutePath))
                 .build();
+
         return ResponseEntity.ok(response);
     }
+
     @GetMapping(value = "/downloadImage")
     public ResponseEntity<?> downloadImage(@RequestParam("path") String path){
         Path filePath = Paths.get(path);

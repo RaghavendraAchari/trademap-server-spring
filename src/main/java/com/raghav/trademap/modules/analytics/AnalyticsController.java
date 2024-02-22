@@ -1,6 +1,6 @@
 package com.raghav.trademap.modules.analytics;
 
-import com.raghav.trademap.modules.analytics.dto.AnalyticsResponse;
+import com.raghav.trademap.modules.analytics.dto.Analytics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +13,7 @@ public class AnalyticsController {
     @Autowired
     AnalyticsService analyticsService;
 
-    public ResponseEntity<AnalyticsResponse> getDetails(){
+    public ResponseEntity<Analytics> getDetails(){
         return ResponseEntity.ok(analyticsService.getDetails(null));
     }
 }
