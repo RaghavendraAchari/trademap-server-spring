@@ -5,12 +5,10 @@ import com.raghav.trademap.common.TrackingDateDetailsRepo;
 import com.raghav.trademap.common.types.ResourceType;
 import com.raghav.trademap.exceptions.ResourceNotFoundException;
 import com.raghav.trademap.modules.settings.dto.SettingsRequest;
-import com.raghav.trademap.modules.settings.dto.SettingsResponse;
 import com.raghav.trademap.modules.settings.dto.SettingsUpdateRequest;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -23,12 +21,11 @@ public class SettingsService {
         this.settingsRepo = settingsRepo;
     }
 
-    public SettingsResponse getSettings(){
+    public Settings getSettings(){
         Optional<Settings> result = settingsRepo.findById(1);
 
-        Settings settings = result.orElseThrow(() -> new ResourceNotFoundException("No settings found", ResourceType.SETTINGS));
+        return result.orElseThrow(() -> new ResourceNotFoundException("No settings found", ResourceType.SETTINGS));
 
-        return SettingsResponse.mapToSettingsResponse(settings);
     }
 
     @Transactional
@@ -48,7 +45,7 @@ public class SettingsService {
     }
 
     @Transactional
-    public SettingsResponse saveSettings(SettingsRequest request) {
+    public Settings saveSettings(SettingsRequest request) {
         if(settingsRepo.findById(1).isPresent())
             throw new RuntimeException("Data already exists");
 
@@ -60,13 +57,11 @@ public class SettingsService {
         settings.setWarnOnMaxTrade(request.getWarnWhenMaxLimitReached());
         settings.setStartDate(request.getTrackingDate());
 
-        Settings saved = settingsRepo.save(settings);
-
-        return SettingsResponse.mapToSettingsResponse(saved);
+        return settingsRepo.save(settings);
     }
 
     @Transactional
-    public SettingsResponse updateSettings(SettingsUpdateRequest request) {
+    public Settings updateSettings(SettingsUpdateRequest request) {
         if(settingsRepo.findById(1).isPresent())
             throw new RuntimeException("Data already exists");
 
@@ -79,8 +74,6 @@ public class SettingsService {
         settings.setWarnOnMaxTrade(request.getWarnWhenMaxLimitReached());
         settings.setStartDate(request.getTrackingDate());
 
-        Settings saved = settingsRepo.save(settings);
-
-        return SettingsResponse.mapToSettingsResponse(saved);
+        return settingsRepo.save(settings);
     }
 }

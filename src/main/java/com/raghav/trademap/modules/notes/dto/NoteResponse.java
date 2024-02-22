@@ -1,10 +1,7 @@
 package com.raghav.trademap.modules.notes.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.raghav.trademap.modules.notes.model.Notes;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.FetchType;
+import com.raghav.trademap.modules.notes.model.Note;
 import lombok.Builder;
 import lombok.Data;
 
@@ -30,7 +27,7 @@ public class NoteResponse {
 
     private String description;
 
-    public static NoteResponse mapToNoteResponse(Notes notes) {
+    public static NoteResponse mapToNoteResponse(Note notes) {
         return NoteResponse.builder()
                 .id(notes.getId())
                 .content(notes.getContent())

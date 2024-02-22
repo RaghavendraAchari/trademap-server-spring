@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Notes {
+public class Note {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -42,8 +42,8 @@ public class Notes {
     private String description;
 
 
-    public static Notes mapToNote(NoteRequest request){
-        return Notes.builder()
+    public static Note mapToNote(NoteRequest request){
+        return Note.builder()
                 .dateTime(request.getDateTime())
                 .categories(request.getCategories())
                 .tags(request.getTags())

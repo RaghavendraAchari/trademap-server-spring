@@ -2,8 +2,7 @@ package com.raghav.trademap.modules.notes;
 
 import com.raghav.trademap.modules.notes.dto.DistinctData;
 import com.raghav.trademap.modules.notes.dto.NoteRequest;
-import com.raghav.trademap.modules.notes.dto.NoteResponse;
-import com.raghav.trademap.modules.notes.model.Notes;
+import com.raghav.trademap.modules.notes.model.Note;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -16,18 +15,14 @@ public class NotesService {
     @Autowired
     private NotesRepo notesRepo;
 
-    public List<NoteResponse> getAllNotes(String category, String tag, Sort.Direction sort){
-        List<Notes> result = notesRepo.findAll(Sort.by(sort, "dateTime"));
-
-        return result.stream().map(NoteResponse::mapToNoteResponse).toList();
+    public List<Note> getAllNotes(String category, String tag, Sort.Direction sort){
+        return notesRepo.findAll(Sort.by(sort, "dateTime"));
     }
 
-    public NoteResponse postNote(NoteRequest noteRequest){
-        Notes note = Notes.mapToNote(noteRequest);
+    public Note saveNote(NoteRequest noteRequest){
+        Note note = Note.mapToNote(noteRequest);
 
-        Notes saved = notesRepo.save(note);
-
-        return NoteResponse.mapToNoteResponse(saved);
+        return notesRepo.save(note);
     }
 
     public boolean deleteNote(Long id){
@@ -36,13 +31,13 @@ public class NotesService {
         return notesRepo.findById(id).isEmpty();
     }
 
-    public NoteResponse updateNote(NoteRequest request){
+    public Note updateNote(NoteRequest request){
         if(request.getId() == null){
             throw new RuntimeException("Id should be present");
         }
 
-        Optional<Notes> result = notesRepo.findById(request.getId());
-        Notes existing = result.orElseThrow();
+        Optional<Note> result = notesRepo.findById(request.getId());
+        Note existing = result.orElseThrow();
 
         //update the note
         existing.setCategories(request.getCategories());
@@ -52,9 +47,7 @@ public class NotesService {
         existing.setTitle(request.getTitle());
         existing.setDescription(request.getDescription());
 
-        Notes updated = notesRepo.save(existing);
-
-        return NoteResponse.mapToNoteResponse(updated);
+        return notesRepo.save(existing);
     }
 
     public DistinctData getDistinctCategoriesAndTags() {

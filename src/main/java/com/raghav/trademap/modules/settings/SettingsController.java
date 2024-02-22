@@ -20,16 +20,24 @@ public class SettingsController {
 
     @PostMapping()
     public ResponseEntity<SettingsResponse> saveSettings(@RequestBody SettingsRequest request){
-        return ResponseEntity.ok(settingsService.saveSettings(request));
+        SettingsResponse settingsResponse = SettingsResponse.mapToSettingsResponse(settingsService.saveSettings(request));
+
+        return ResponseEntity.ok(settingsResponse);
     }
 
     @PutMapping
     public ResponseEntity<SettingsResponse> updateSettings(@RequestBody SettingsUpdateRequest request){
-        return ResponseEntity.ok(settingsService.updateSettings(request));
+        SettingsResponse settingsResponse = SettingsResponse.mapToSettingsResponse(settingsService.updateSettings(request));
+
+        return ResponseEntity.ok(settingsResponse);
     }
 
     @GetMapping
     public ResponseEntity<SettingsResponse> getAllSettings(){
-        return ResponseEntity.ok(settingsService.getSettings());
+        Settings settings = settingsService.getSettings();
+
+        SettingsResponse settingsResponse = SettingsResponse.mapToSettingsResponse(settings);
+
+        return ResponseEntity.ok(settingsResponse);
     }
 }
