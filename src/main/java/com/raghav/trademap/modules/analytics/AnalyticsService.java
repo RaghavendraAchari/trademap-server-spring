@@ -29,16 +29,7 @@ public class AnalyticsService {
     @Autowired
     SettingsRepo settingsRepo;
 
-
-    //TODO - add insights details - user should be greeted with the learnings the he has done in his trading journey
     public Analytics getDetails(String userId){
-        //TODO - add all the analytics data by fetching it with all the available repositories
-        /*
-        *
-        * add total days (get start date- trackingDateDetails or settings) - then get cur date and date difference from
-        * Calender
-        */
-
         // investment details
         List<InvestmentDetails> all = investmentDetailsRepo.findAll();
 
@@ -51,7 +42,6 @@ public class AnalyticsService {
         Integer totalTrades = tradeDetailsRepo.getTotalTrades();
         Integer lossTrades = tradeDetailsRepo.getLossTrades();
         Integer profitableTrades = tradeDetailsRepo.getProfitableTrades();
-
 
         Integer totalNoTradingDays = tradeDetailsRepo.getTotalNoTradingDays();
         Integer totalWeekends = tradeDetailsRepo.getTotalWeekends();
