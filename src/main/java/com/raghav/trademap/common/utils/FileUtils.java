@@ -59,12 +59,11 @@ public class FileUtils {
                 throw new RuntimeException(e);
             }
         }
-
         String fileName;
         if(file.getOriginalFilename() == null)
             fileName = "Insight Image - " + String.valueOf(new Random().nextLong());
         else
-            fileName = file.getOriginalFilename().replace("&", "-");
+            fileName = System.currentTimeMillis() + "-" + file.getOriginalFilename().replace("&", "-");
 
         try(InputStream inputStream = file.getInputStream()){
             Path filePath = path.resolve(fileName);

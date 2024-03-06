@@ -1,12 +1,14 @@
 package com.raghav.trademap.modules.analytics.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.raghav.trademap.modules.tradeDetails.dataClasses.DateAndProfit;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -21,6 +23,7 @@ public class Analytics {
     private Integer totalWeekends;
     private Integer totalNoTradingDays;
     private Integer totalHolidays;
+    private Integer totalTradedDays;
 
     private Integer totalTrades;
     private Integer totalTradesInStock;
@@ -31,11 +34,16 @@ public class Analytics {
     private Double maxProfitInADay;
     private Double maxLossInADay;
 
-    @JsonFormat(pattern = "YYYY-MM-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = "YYYY-MM-dd")
     private LocalDate dateOfMaxProfit;
-    @JsonFormat(pattern = "YYYY-MM-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = "YYYY-MM-dd")
     private LocalDate dateOfMaxLoss;
 
     private Integer noOfProfitTrades;
     private Integer noOfLossTrades;
+
+    private Integer profitMakingDays;
+    private Integer lossMakingDays;
+
+    private List<DateAndProfit> dateWiseProfit;
 }

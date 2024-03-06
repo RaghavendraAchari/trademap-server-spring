@@ -1,5 +1,7 @@
 package com.raghav.trademap.modules.tradeDetails;
 
+import com.raghav.trademap.common.types.InstrumentType;
+import com.raghav.trademap.modules.tradeDetails.dataClasses.DateAndProfit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -28,7 +30,6 @@ public interface TradeDetailsRepo extends JpaRepository<TradeDetails, Long> {
     @Query("SELECT DISTINCT CAST(date(a.dateTime) AS LocalDate) FROM TradeDetails a WHERE date(a.dateTime) >= :trackingDate")
     List<LocalDate> findDistinctDates(@Param("trackingDate") LocalDate trackingDate);
 
-
     @Query("select MAX(a.day) from TradeDetails a where a.isHoliday != true and DATE(a.dateTime) != DATE(CURRENT_DATE)")
     Integer findMaxDay();
 
@@ -44,4 +45,35 @@ public interface TradeDetailsRepo extends JpaRepository<TradeDetails, Long> {
     Page<TradeDetails> findAll(Specification<TradeDetails> specification, Pageable pageable);
 
     List<TradeDetails> findAll(Specification<TradeDetails> specification, Sort sort);
+
+    //queries for analytics
+    @Query("select count(a) AS total from TradeDetails a where a.isWeekend = false and a.isHoliday = false and a.noTradingDay = false")
+    Integer getTotalTrades();
+
+    @Query("select count(a) AS total from TradeDetails a where instrumentType = :instrumentType")
+    Integer getTotalTradesWithInstrumentType(@Param("instrumentType") InstrumentType instrumentType);
+
+    @Query("select new com.raghav.trademap.modules.tradeDetails.dataClasses.DateAndProfit(CAST(date(a.dateTime) AS LocalDate), SUM(a.pnl)) from TradeDetails a where a.isWeekend = false and a.isHoliday = false and a.noTradingDay = false group by date(a.dateTime) order by date(a.dateTime) DESC")
+    List<DateAndProfit> getDateWiseProfit();
+
+    @Query("select sum(a.pnl) AS totalPnl from TradeDetails a where a.isWeekend = false and a.isHoliday = false and a.noTradingDay = false")
+    Double getTotalPnl();
+
+    @Query("select count(a) AS profitableTrades from TradeDetails a where a.pnl is not null and a.pnl > 0")
+    Integer getProfitableTrades();
+
+    @Query("select count(a) AS lossTrades from TradeDetails a where a.pnl is not null and a.pnl <= 0")
+    Integer getLossTrades();
+
+    @Query("select count(a) AS weekends from TradeDetails a where a.isWeekend = true")
+    Integer getTotalWeekends();
+
+    @Query("select count(a) AS weekends from TradeDetails a where a.isHoliday = true")
+    Integer getTotalHolidays();
+
+    @Query("select count(a) AS weekends from TradeDetails a where a.noTradingDay = true")
+    Integer getTotalNoTradingDays();
+
+    @Query("select count( DISTINCT date(a.dateTime) ) AS tradedDays from TradeDetails a where a.isWeekend = false and a.isHoliday = false and a.noTradingDay = false ")
+    Integer getTotalTradedDays();
 }
