@@ -13,46 +13,28 @@ import java.util.Optional;
 
 @Service
 public class SettingsService {
-    private final TrackingDateDetailsRepo trackingDateDetailsRepo;
     private final SettingsRepo settingsRepo;
 
-    public SettingsService(TrackingDateDetailsRepo repo, SettingsRepo settingsRepo){
-        this.trackingDateDetailsRepo = repo;
+    public SettingsService(SettingsRepo settingsRepo){
         this.settingsRepo = settingsRepo;
     }
 
-    public Settings getSettings(){
-        Optional<Settings> result = settingsRepo.findById(1);
+    public Settings getSettings(String user){
+        Optional<Settings> result = settingsRepo.findByUserId(user);
 
         return result.orElseThrow(() -> new ResourceNotFoundException("No settings found", ResourceType.SETTINGS));
 
     }
 
     @Transactional
-    private Settings createNewSettings(){
-        Optional<TrackingDateDetails> trackingDateDetails = trackingDateDetailsRepo.findById(1);
-        TrackingDateDetails trackingDate = trackingDateDetails.orElseThrow();
-
-        Settings settings = new Settings();
-
-        // only for one user
-        settings.setId(1);
-        settings.setMaxTradeLimit(1);
-        settings.setWarnOnMaxTrade(true);
-        settings.setStartDate(trackingDate.getStartDate());
-
-        return settingsRepo.save(settings);
-    }
-
-    @Transactional
-    public Settings saveSettings(SettingsRequest request) {
-        if(settingsRepo.findById(1).isPresent())
+    public Settings saveSettings(SettingsRequest request, String user) {
+        if(settingsRepo.findByUserId(user).isPresent())
             throw new RuntimeException("Data already exists");
 
         Settings settings = new Settings();
 
         // only for one user
-        settings.setId(1);
+        settings.setUserId(user);
         settings.setMaxTradeLimit(request.getMaxTradesLimit());
         settings.setWarnOnMaxTrade(request.getWarnWhenMaxLimitReached());
         settings.setStartDate(request.getTrackingDate());

@@ -10,7 +10,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -57,8 +56,9 @@ public class TradeDetailsRequest {
         @NotNull
         private Double pnl;
 
-        public static TradeDetails mapToTradeDetails(TradeDetailsRequest request, List<String> paths) {
+        public static TradeDetails mapToTradeDetails(TradeDetailsRequest request, List<String> paths, String user) {
                 return TradeDetails.builder()
+                        .userId(user)
                         .dateTime(request.dateTime)
                         .day(request.getDay())
                         .noTradingDay(request.isNoTradingDay())

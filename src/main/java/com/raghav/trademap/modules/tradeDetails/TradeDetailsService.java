@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +36,9 @@ public class TradeDetailsService {
     @Autowired
     private DailyChartImagesRepo dailyChartImagesRepo;
 
-    public List<TradeDetails> getTradeDetails(Integer page, Integer size, Sort.Direction sortDirection, Boolean showHoliday, Boolean showWeekend, Boolean showNoTradingDay){
+    public List<TradeDetails> getTradeDetails(Integer page, Integer size, Sort.Direction sortDirection,
+                                              Boolean showHoliday, Boolean showWeekend,
+                                              Boolean showNoTradingDay, String user){
         log.info("Getting all trades from DB with Sort:" + sortDirection);
 
         Specification<TradeDetails> specification = new Specification<>() {
@@ -48,6 +49,8 @@ public class TradeDetailsService {
                 if(!showHoliday) predicates.add(criteriaBuilder.equal(root.get("isHoliday"), false));
                 if(!showWeekend) predicates.add(criteriaBuilder.equal(root.get("isWeekend"), false));
                 if(!showNoTradingDay) predicates.add(criteriaBuilder.equal(root.get("noTradingDay"), false));
+
+                predicates.add(criteriaBuilder.equal(root.get("userId"), user));
 
                 return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
             }
@@ -61,23 +64,14 @@ public class TradeDetailsService {
         return tradeDetailsRepo.findAll(specification, pageData).getContent();
     }
 
-    public String getLastFilledDate(){
-        LocalDateTime lastByDateTime = tradeDetailsRepo.findLastByDateTime();
-
-        if(lastByDateTime != null)
-            return lastByDateTime.toLocalDate().toString();
-
-        else return LocalDate.now().toString();
-    }
-
-    public List<String> getPendingDates(){
-        Optional<Settings> result = settingsRepo.findById(1);
+    public List<String> getPendingDates(String user){
+        Optional<Settings> result = settingsRepo.findByUserId(user);
 
         if (result.isEmpty())
             throw new RuntimeException();
 
         LocalDate trackingDate = result.get().getStartDate();
-        List<LocalDate> filledDates = tradeDetailsRepo.findDistinctDates(trackingDate);
+        List<LocalDate> filledDates = tradeDetailsRepo.findDistinctDates(trackingDate, user);
 
         LocalDate today = LocalDate.now();
         LocalDate startDate = LocalDate.parse(trackingDate.toString());
@@ -98,8 +92,10 @@ public class TradeDetailsService {
     }
 
     @Transactional
-    public TradeDetails postTradeDetails(TradeDetailsRequest request, MultipartFile[] images){
-        List<TradeDetails> result = tradeDetailsRepo.getTradesForTheDate(request.getDateTime().toLocalDate());
+    public TradeDetails postTradeDetails(TradeDetailsRequest request,
+                                         MultipartFile[] images,
+                                         String user){
+        List<TradeDetails> result = tradeDetailsRepo.getTradesForTheDate(user, request.getDateTime().toLocalDate());
 
         //if already set as 'no trading day' then throw an error
         if(result.size() == 1 ){
@@ -116,24 +112,24 @@ public class TradeDetailsService {
         List<String> paths = FileUtils.copyFileToSystem(request, images, setupName, date);
 
         //create db entity with image paths
-        TradeDetails tradeDetails = TradeDetailsRequest.mapToTradeDetails(request, paths);
+        TradeDetails tradeDetails = TradeDetailsRequest.mapToTradeDetails(request, paths, user);
 
         return tradeDetailsRepo.save(tradeDetails);
     }
 
 
 
-    public Integer getMaxDayTraded(){
-        Integer maxDay = tradeDetailsRepo.findMaxDay();
+    public Integer getMaxDayTraded(String user){
+        Integer maxDay = tradeDetailsRepo.findMaxDay(user);
         return maxDay != null ? maxDay : 0;
     }
 
-    public List<TradeDetails> getCurrentDayTrades() {
-        return tradeDetailsRepo.findTradeDetailsOfCurrentDay();
-    }
+//    public List<TradeDetails> getCurrentDayTrades() {
+//        return tradeDetailsRepo.findTradeDetailsOfCurrentDay();
+//    }
 
     @Transactional
-    public boolean setNoTradingDay(NoTradeRequest request) {
+    public boolean setNoTradingDay(NoTradeRequest request, String user) {
         Integer maxDay = null;
 
         TradeDetails tradeDetails = TradeDetails.builder()
@@ -142,10 +138,11 @@ public class TradeDetailsService {
                 .isWeekend(request.getIsWeekend())
                 .remarks(request.getRemarks())
                 .dateTime(request.getDateTime())
+                .userId(user)
                 .build();
 
         if(request.getNoTradingDay()) {
-            maxDay = tradeDetailsRepo.findMaxDay();
+            maxDay = tradeDetailsRepo.findMaxDay(user);
             tradeDetails.setDay(maxDay + 1);
         }
 
@@ -154,12 +151,12 @@ public class TradeDetailsService {
         return saved.getId() != null;
     }
 
-    public List<TradeDetails> getTradesForTheDate(LocalDate date) {
-        return tradeDetailsRepo.getTradesForTheDate(date);
+    public List<TradeDetails> getTradesForTheDate(String user, LocalDate date) {
+        return tradeDetailsRepo.getTradesForTheDate(user, date);
     }
 
-    public DistinctData getDistinctData() {
-        List<String> setups = tradeDetailsRepo.findDistinctSetupName();
+    public DistinctData getDistinctData(String user) {
+        List<String> setups = tradeDetailsRepo.findDistinctSetupName(user);
         List<String> instruments = tradeDetailsRepo.findDistinctInstrumentName();
 
         return new DistinctData(setups, instruments);

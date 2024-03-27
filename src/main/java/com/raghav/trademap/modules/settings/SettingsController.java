@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -19,8 +20,8 @@ public class SettingsController {
     private SettingsService settingsService;
 
     @PostMapping()
-    public ResponseEntity<SettingsResponse> saveSettings(@RequestBody SettingsRequest request){
-        SettingsResponse settingsResponse = SettingsResponse.mapToSettingsResponse(settingsService.saveSettings(request));
+    public ResponseEntity<SettingsResponse> saveSettings(Principal principal, @RequestBody SettingsRequest request){
+        SettingsResponse settingsResponse = SettingsResponse.mapToSettingsResponse(settingsService.saveSettings(request, principal.getName()));
 
         return ResponseEntity.ok(settingsResponse);
     }
@@ -33,8 +34,8 @@ public class SettingsController {
     }
 
     @GetMapping
-    public ResponseEntity<SettingsResponse> getAllSettings(){
-        Settings settings = settingsService.getSettings();
+    public ResponseEntity<SettingsResponse> getAllSettings(Principal principal){
+        Settings settings = settingsService.getSettings(principal.getName());
 
         SettingsResponse settingsResponse = SettingsResponse.mapToSettingsResponse(settings);
 

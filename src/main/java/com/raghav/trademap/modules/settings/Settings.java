@@ -23,6 +23,9 @@ public class Settings {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
+    @Column(name = "user_id")
+    String userId;
+
     @Column(name = "max_trade_limit")
     @ColumnDefault(value = "1")
     Integer maxTradeLimit;

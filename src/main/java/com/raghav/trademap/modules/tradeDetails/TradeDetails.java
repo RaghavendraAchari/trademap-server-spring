@@ -24,6 +24,9 @@ public class TradeDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "user_id")
+    private String userId;
+
     @Column(name = "day")
     private Integer day;
 

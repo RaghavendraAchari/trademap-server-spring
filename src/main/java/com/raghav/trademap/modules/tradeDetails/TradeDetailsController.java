@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Principal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -29,13 +30,14 @@ public class TradeDetailsController {
     private TradeDetailsService tradeDetailsService;
 
     @GetMapping()
-    public ResponseEntity<List<TradeDetailsResponse>> getTradeDetails(@RequestParam(required = false) Integer page,
+    public ResponseEntity<List<TradeDetailsResponse>> getTradeDetails(Principal principal,
+                                                                      @RequestParam(required = false) Integer page,
                                                                       @RequestParam(required = false) Integer size,
                                                                       @RequestParam(defaultValue = "DESC") Sort.Direction sort,
                                                                       @RequestParam(defaultValue = "true") Boolean showHoliday,
                                                                       @RequestParam(defaultValue = "true") Boolean showNoTradingDay,
                                                                       @RequestParam(defaultValue = "true") Boolean showWeekend ){
-        List<TradeDetails> tradeDetails = tradeDetailsService.getTradeDetails(page, size, sort, showHoliday, showWeekend, showNoTradingDay);
+        List<TradeDetails> tradeDetails = tradeDetailsService.getTradeDetails(page, size, sort, showHoliday, showWeekend, showNoTradingDay, principal.getName());
 
         List<TradeDetailsResponse> response = tradeDetails.stream()
                                                 .map(TradeDetailsResponse::mapToTradeDetailsResponse).toList();
@@ -44,34 +46,29 @@ public class TradeDetailsController {
     }
 
     @GetMapping("/setupsAndInstuments")
-    public ResponseEntity<DistinctData> getDistinctData(){
-        return ResponseEntity.ok(tradeDetailsService.getDistinctData());
+    public ResponseEntity<DistinctData> getDistinctData(Principal principal){
+        return ResponseEntity.ok(tradeDetailsService.getDistinctData(principal.getName()));
     }
 
-    @Deprecated
-    @GetMapping("/lastFilledDate")
-    public ResponseEntity<String> getLastFilledDate(){
-        return ResponseEntity.ok(tradeDetailsService.getLastFilledDate());
-    }
 
     @GetMapping("/pendingDates")
-    public ResponseEntity<List<String>> getPendingDates(){
-        return ResponseEntity.ok(tradeDetailsService.getPendingDates());
+    public ResponseEntity<List<String>> getPendingDates(Principal principal){
+        return ResponseEntity.ok(tradeDetailsService.getPendingDates(principal.getName()));
     }
 
-    @GetMapping("/today")
-    public ResponseEntity<List<TradeDetailsResponse>> getTradeDetailsOfToday(){
-        List<TradeDetails> currentDayTrades = tradeDetailsService.getCurrentDayTrades();
-
-        List<TradeDetailsResponse> response = currentDayTrades.stream()
-                .map(TradeDetailsResponse::mapToTradeDetailsResponse).toList();
-
-        return ResponseEntity.ok(response);
-    }
+//    @GetMapping("/today")
+//    public ResponseEntity<List<TradeDetailsResponse>> getTradeDetailsOfToday(Principal principal){
+//        List<TradeDetails> currentDayTrades = tradeDetailsService.getCurrentDayTrades();
+//
+//        List<TradeDetailsResponse> response = currentDayTrades.stream()
+//                .map(TradeDetailsResponse::mapToTradeDetailsResponse).toList();
+//
+//        return ResponseEntity.ok(response);
+//    }
 
     @GetMapping("/forDate")
-    public ResponseEntity<List<TradeDetailsResponse>> getTradeDetailsForDay(@RequestParam("date") LocalDate date){
-        List<TradeDetails> tradesForTheDate = tradeDetailsService.getTradesForTheDate(date);
+    public ResponseEntity<List<TradeDetailsResponse>> getTradeDetailsForDay(Principal principal, @RequestParam("date") LocalDate date){
+        List<TradeDetails> tradesForTheDate = tradeDetailsService.getTradesForTheDate(principal.getName(), date);
 
         List<TradeDetailsResponse> responseList = tradesForTheDate.stream().map(TradeDetailsResponse::mapToTradeDetailsResponse).toList();
 
@@ -79,19 +76,19 @@ public class TradeDetailsController {
     }
 
     @PostMapping("/setNoTradingDay")
-    public ResponseEntity<Boolean> setNoTradingDay(@RequestBody NoTradeRequest request){
-        return ResponseEntity.ok(tradeDetailsService.setNoTradingDay(request));
+    public ResponseEntity<Boolean> setNoTradingDay(Principal principal, @RequestBody NoTradeRequest request){
+        return ResponseEntity.ok(tradeDetailsService.setNoTradingDay(request, principal.getName()));
     }
 
     @GetMapping(value = "/getMaxDaysTraded", produces="application/json")
-    public ResponseEntity<MaxTradedDays> getMaxDayTraded(){
-        Integer maxDayTraded = tradeDetailsService.getMaxDayTraded();
+    public ResponseEntity<MaxTradedDays> getMaxDayTraded(Principal principal){
+        Integer maxDayTraded = tradeDetailsService.getMaxDayTraded(principal.getName());
 
         return ResponseEntity.ok(new MaxTradedDays(maxDayTraded));
     }
 
     @GetMapping(value = "/downloadImage")
-    public ResponseEntity<?> downloadImage(@RequestParam("path") String path){
+    public ResponseEntity<?> downloadImage(Principal principal, @RequestParam("path") String path){
         Path filePath = Paths.get(path);
 
         if(Files.exists(filePath)){
@@ -115,8 +112,10 @@ public class TradeDetailsController {
     }
 
     @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE } )
-    public ResponseEntity<TradeDetailsResponse> postTradeDetails(@RequestPart("tradeDetails") @Valid TradeDetailsRequest tradeDetailsRequest, @RequestPart("images") MultipartFile[] images){
-        TradeDetails saved = tradeDetailsService.postTradeDetails(tradeDetailsRequest, images);
+    public ResponseEntity<TradeDetailsResponse> postTradeDetails(Principal principal,
+                                                                 @RequestPart("tradeDetails") @Valid TradeDetailsRequest tradeDetailsRequest,
+                                                                 @RequestPart("images") MultipartFile[] images){
+        TradeDetails saved = tradeDetailsService.postTradeDetails(tradeDetailsRequest, images, principal.getName());
 
         return ResponseEntity.ok(TradeDetailsResponse.mapToTradeDetailsResponse(saved));
 

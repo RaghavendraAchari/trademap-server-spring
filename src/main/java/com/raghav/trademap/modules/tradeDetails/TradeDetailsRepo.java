@@ -21,26 +21,23 @@ public interface TradeDetailsRepo extends JpaRepository<TradeDetails, Long> {
     @Query("select a.dateTime from TradeDetails a order by a.dateTime DESC limit 1")
     LocalDateTime findLastByDateTime();
 
-    @Query("select MAX(a.day) from TradeDetails a")
-    Integer findLastDayOfTrade();
+//    @Query("select a from TradeDetails a where Date(a.dateTime) = Date(CURRENT_DATE)")
+//    List<TradeDetails> findTradeDetailsOfCurrentDay();
 
-    @Query("select a from TradeDetails a where Date(a.dateTime) = Date(CURRENT_DATE)")
-    List<TradeDetails> findTradeDetailsOfCurrentDay();
+    @Query("SELECT DISTINCT CAST(date(a.dateTime) AS LocalDate) FROM TradeDetails a WHERE date(a.dateTime) >= :trackingDate and userId = :user")
+    List<LocalDate> findDistinctDates(@Param("trackingDate") LocalDate trackingDate, @Param("user") String user);
 
-    @Query("SELECT DISTINCT CAST(date(a.dateTime) AS LocalDate) FROM TradeDetails a WHERE date(a.dateTime) >= :trackingDate")
-    List<LocalDate> findDistinctDates(@Param("trackingDate") LocalDate trackingDate);
+    @Query("select MAX(a.day) from TradeDetails a where a.isHoliday != true and DATE(a.dateTime) != DATE(CURRENT_DATE) and userId = :user")
+    Integer findMaxDay(@Param("user") String user);
 
-    @Query("select MAX(a.day) from TradeDetails a where a.isHoliday != true and DATE(a.dateTime) != DATE(CURRENT_DATE)")
-    Integer findMaxDay();
-
-    @Query("select a from TradeDetails a where Date(a.dateTime) = :date")
-    List<TradeDetails> getTradesForTheDate(@Param("date") LocalDate date);
+    @Query("select a from TradeDetails a where Date(a.dateTime) = :date and userId = :user")
+    List<TradeDetails> getTradesForTheDate(@Param("user") String user, @Param("date") LocalDate date);
 
     @Query("select distinct a.instrumentName from TradeDetails a where a.instrumentName is not null")
     List<String> findDistinctInstrumentName();
 
-    @Query("select distinct a.setupName from TradeDetails a where a.setupName is not null")
-    List<String> findDistinctSetupName();
+    @Query("select distinct a.setupName from TradeDetails a where a.setupName is not null and userId = :user")
+    List<String> findDistinctSetupName(@Param("user") String user);
 
     Page<TradeDetails> findAll(Specification<TradeDetails> specification, Pageable pageable);
 
